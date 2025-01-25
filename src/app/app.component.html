@@ -1,0 +1,144 @@
+<nav class="bg-blue-600 text-white p-4 shadow-lg flex justify-center items-center h-16 dark:bg-gray-800 dark:text-gray-100">
+  <a class="text-2xl font-bold hover:text-gray-300 dark:hover:text-gray-400" href="#">Angular Pokémon CRUD</a>
+</nav>
+
+<div class="container mx-auto mt-8">
+
+  <!-- Formulario para agregar/editar Pokémon -->
+  <div class="bg-gray-100 shadow-lg rounded-lg p-6 dark:bg-gray-800">
+    <h2 class="text-xl font-bold mb-4 dark:text-gray-100">
+      {{ isEditing ? 'Editar Pokémon' : 'Agregar Pokémon' }}
+    </h2>
+    <form [formGroup]="pokemonForm" (ngSubmit)="isEditing ? actualizarPokemon() : agregarPokemon()">
+      <div class="mb-4">
+        <label for="name" class="block font-bold mb-2 dark:text-gray-300">Nombre:</label>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          class="w-full border border-gray-300 px-4 py-2 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+        />
+      </div>
+      <div class="mb-4">
+        <label for="height" class="block font-bold mb-2 dark:text-gray-300">Altura:</label>
+        <input
+          id="height"
+          type="number"
+          formControlName="height"
+          class="w-full border border-gray-300 px-4 py-2 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+        />
+      </div>
+      <div class="mb-4">
+        <label for="weight" class="block font-bold mb-2 dark:text-gray-300">Peso:</label>
+        <input
+          id="weight"
+          type="number"
+          formControlName="weight"
+          class="w-full border border-gray-300 px-4 py-2 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+        />
+      </div>
+      <div class="mb-4">
+        <label for="types" class="block font-bold mb-2 dark:text-gray-300">Tipos (separados por comas):</label>
+        <input
+          id="types"
+          type="text"
+          formControlName="types"
+          class="w-full border border-gray-300 px-4 py-2 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+        />
+      </div>
+      <div class="flex justify-end">
+        <button
+          type="submit"
+          class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition"
+        >
+          {{ isEditing ? 'Actualizar' : 'Agregar' }}
+        </button>
+        <button
+          *ngIf="isEditing"
+          type="button"
+          (click)="cancelarEdicion()"
+          class="ml-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 transition"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Barra de búsqueda -->
+  <div class="mb-6 flex justify-center py-10">
+    <input
+      type="text"
+      [(ngModel)]="searchQuery"
+      (input)="onSearchChange()"
+      placeholder="Buscar Pokémon"
+      class="w-full max-w-4xl border border-gray-300 px-6 py-3 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:ring-blue-400 transition"
+    />
+  </div>
+
+  <!-- Tabla de Pokémon filtrados -->
+  <div class="mt-8 bg-white shadow-lg rounded-lg p-6 dark:bg-gray-800 dark:text-gray-100">
+    <h2 class="text-2xl font-bold mb-4">Lista de Pokémon (Filtrados)</h2>
+    <table class="w-full border-collapse border border-gray-300 dark:border-gray-700">
+      <thead>
+        <tr class="bg-gray-200 dark:bg-gray-700">
+          <th class="border border-gray-300 px-4 py-2 dark:border-gray-600">#</th>
+          <th class="border border-gray-300 px-4 py-2 dark:border-gray-600">Nombre</th>
+          <th class="border border-gray-300 px-4 py-2 dark:border-gray-600">Altura</th>
+          <th class="border border-gray-300 px-4 py-2 dark:border-gray-600">Peso</th>
+          <th class="border border-gray-300 px-4 py-2 dark:border-gray-600">Tipos</th>
+          <th class="border border-gray-300 px-4 py-2 dark:border-gray-600">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let pokemon of filteredPokemonList; let i = index">
+          <td class="border border-gray-300 px-4 py-2 dark:border-gray-600">{{ pokemon.id }}</td>
+          <td class="border border-gray-300 px-4 py-2 dark:border-gray-600 capitalize">{{ pokemon.name }}</td>
+          <td class="border border-gray-300 px-4 py-2 dark:border-gray-600">{{ pokemon.height }}</td>
+          <td class="border border-gray-300 px-4 py-2 dark:border-gray-600">{{ pokemon.weight }}</td>
+          <td class="border border-gray-300 px-4 py-2 dark:border-gray-600">{{ pokemon.types.join(', ') }}</td>
+          <td class="border border-gray-300 px-4 py-2 dark:border-gray-600">
+            <button
+              (click)="iniciarEdicion(pokemon.id)"
+              class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
+            >
+              Editar
+            </button>
+            <button
+              (click)="eliminarPokemon(pokemon.id)"
+              class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 ml-2"
+            >
+              Eliminar
+            </button>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Tabla de Pokémon desde la base de datos -->
+  <div class="mt-8 bg-white shadow-lg rounded-lg p-6 dark:bg-gray-800 dark:text-gray-100">
+    <h2 class="text-2xl font-bold mb-4">Lista de Pokémon (Base de Datos)</h2>
+    <table class="w-full border-collapse border border-gray-300 dark:border-gray-700">
+      <thead>
+        <tr class="bg-gray-200 dark:bg-gray-700">
+          <th class="border border-gray-300 px-4 py-2 dark:border-gray-600">#</th>
+          <th class="border border-gray-300 px-4 py-2 dark:border-gray-600">Nombre</th>
+          <th class="border border-gray-300 px-4 py-2 dark:border-gray-600">Altura</th>
+          <th class="border border-gray-300 px-4 py-2 dark:border-gray-600">Peso</th>
+          <th class="border border-gray-300 px-4 py-2 dark:border-gray-600">Tipos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let pokemon of databasePokemonList; let i = index">
+          <td class="border border-gray-300 px-4 py-2 dark:border-gray-600">{{ pokemon.id }}</td>
+          <td class="border border-gray-300 px-4 py-2 dark:border-gray-600 capitalize">{{ pokemon.name }}</td>
+          <td class="border border-gray-300 px-4 py-2 dark:border-gray-600">{{ pokemon.height }}</td>
+          <td class="border border-gray-300 px-4 py-2 dark:border-gray-600">{{ pokemon.weight }}</td>
+          <td class="border border-gray-300 px-4 py-2 dark:border-gray-600">{{ pokemon.types.join(', ') }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
